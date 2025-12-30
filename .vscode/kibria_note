@@ -21,3 +21,33 @@ class StudentSerializer(serializers.ModelSerializer):
 
         # Finally database e save kora
         return super().create(validated_data)
+
+
+
+def update(self, instance, validated_data):
+        # instance = Purano data (DB te ja ache)
+        # validated_data = Notun data (User ja pathiyese)
+
+        # Notun data nichi, jodi user kichu na pathay tobe purano tai thakbe
+        new_age = validated_data.get('age', instance.age)
+        new_roll = validated_data.get('roll', instance.roll)
+        new_name = validated_data.get('name', instance.name)
+
+        # --- Type 3: Previous value er sathe compare ---
+        # Condition: Roll number komanu jabe na. Notun roll purano roll er cheye boro hote hobe.
+        if new_roll < instance.roll:
+            raise serializers.ValidationError({"roll": "Roll number cannot be decreased."})
+
+        # --- Type 1: Check korbe data na mille error dibe ---
+        # Condition: Age jodi 100 er beshi hoy
+        if new_age > 100:
+             raise serializers.ValidationError({"age": "Age is not valid."})
+
+        # --- Type 2: Data modify kora ---
+        # Namer seshe '(Updated)' kotha ta add kore dibo
+        # Tobe check kori, jodi nam change hoye thake tobei add korbo
+        if new_name != instance.name:
+            validated_data['name'] = f"{new_name} (Updated)"
+
+        # Finally update complete kora
+        return super().update(instance, validated_data)
