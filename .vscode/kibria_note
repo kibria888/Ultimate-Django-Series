@@ -1,0 +1,23 @@
+# serializers.py
+from rest_framework import serializers
+from .models import Student
+
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['id', 'name', 'age', 'roll']
+
+    def create(self, validated_data):
+        # --- Type 1: Check korbe data na mille error dibe ---
+        # Jodi age 18 er niche hoy, tobe error dibe
+        if validated_data['age'] < 18:
+            raise serializers.ValidationError({"age": "Age must be at least 18."})
+
+        # --- Type 2: Data er sathe notun kichu add korbe ---
+        # Namer sathe ekta random number (e.g., ID or Roll) add kora
+        # Dhori user pathiyese "Rahim", amra setake "Rahim_BDT" banabo
+        original_name = validated_data['name']
+        validated_data['name'] = f"{original_name}_BDT"
+
+        # Finally database e save kora
+        return super().create(validated_data)
